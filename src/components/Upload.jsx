@@ -5,9 +5,39 @@ import uploadIcon from '../assets/upload.svg';
 export default function Upload() {
     const inputRef = useRef(null);
     const [preview, setPreview] = useState(null);
+    const [dragging, setDragging] = useState(false);
 
     function onFileChange(e) {
         const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        setPreview(url);
+    }
+
+    function handleDragEnter(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragging(true);
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // keep dragging state true so CSS can reflect it
+        setDragging(true);
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragging(false);
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragging(false);
+        const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
         if (!file) return;
         const url = URL.createObjectURL(file);
         setPreview(url);
@@ -22,7 +52,15 @@ export default function Upload() {
 
     return (
         <div className="upload-img">
-            <label htmlFor="input-file" id="drop-area">
+            <label
+                htmlFor="input-file"
+                id="drop-area"
+                className={`upload-area ${preview ? 'has-preview' : ''} ${dragging ? 'dragging' : ''}`}
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+            >
                 <input
                     type="file"
                     accept="image/*"
